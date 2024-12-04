@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pron_difficulty"
+version = "0.1.0"
+description = "A package to evaluate pronunciation difficulty of words in multiple languages"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["pronunciation", "difficulty", "multilingual", "nlp"]
+authors = [
+    { name = "Federico Torrielli", email = "federico.torrielli@unito.it" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "phonemizer>=3.2.1",     # For phonetic transcription
+    "numpy>=1.20.0",         # For numerical operations
+    "torch>=2.0.0",          # For neural model
+    "transformers>=4.30.0",  # For BERT model
+]
+
+[project.urls]
+Homepage = "https://github.com/federicotorrielli/pron-difficulty"
+Repository = "https://github.com/federicotorrielli/pron-difficulty.git"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pron_difficulty"] 
