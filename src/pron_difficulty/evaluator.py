@@ -1,55 +1,23 @@
-import torch
 from typing import List
-from phonemizer import phonemize
-from phonemizer.backend import EspeakBackend
-from transformers import AutoTokenizer, AutoModel
-from sklearn.preprocessing import MinMaxScaler
-import numpy as np
 
-from .models import PhonemeDifficultyModel
+import numpy as np
+from phonemizer import phonemize
+
 from .utils.phoneme_utils import (
-    get_syllable_complexity_patterns,
     analyze_syllable_structure,
+    get_syllable_complexity_patterns,
 )
 from .utils.phonological_features import (
-    calculate_phonological_complexity,
     analyze_phonotactic_constraints,
+    calculate_phonological_complexity,
     get_sonority_hierarchy_score,
 )
 
 
 class PronDifficulty:
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.phonemizer_backends = {"en": "en-us", "nb": "nb", "es": "es", "it": "it"}
-
-        # Initialize phoneme embeddings model
-        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-multilingual-cased")
-        self.bert_model = AutoModel.from_pretrained("bert-base-multilingual-cased").to(
-            self.device
-        )
-
-        # Initialize difficulty prediction model
-        self.difficulty_model = PhonemeDifficultyModel(768).to(
-            self.device
-        )  # 768 is BERT's hidden size
-
-        # Load language-specific resources
         self.syllable_complexity = get_syllable_complexity_patterns()
-        self.scaler = MinMaxScaler()
-
-    def _get_phoneme_embedding(self, phonemes: str) -> torch.Tensor:
-        """Convert phonemes to embeddings using BERT"""
-        inputs = self.tokenizer(
-            phonemes, return_tensors="pt", padding=True, truncation=True
-        )
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
-
-        with torch.no_grad():
-            outputs = self.bert_model(**inputs)
-            embeddings = outputs.last_hidden_state.mean(dim=1)
-
-        return embeddings
 
     def _analyze_prosodic_structure(self, phonemes: List[str]) -> float:
         """
@@ -150,18 +118,9 @@ class PronDifficulty:
         # Analyze prosodic structure
         prosodic_complexity = self._analyze_prosodic_structure(phoneme_list)
 
-        # Get neural model prediction (minimal weight)
-        embeddings = self._get_phoneme_embedding(phonemes)
-        embeddings = embeddings.view(1, 1, -1)
-        with torch.no_grad():
-            model_score = (
-                self.difficulty_model(embeddings).item() * 0.2
-            )  # Further reduced
-
         # Calculate base difficulty score with adjusted weights
         base_score = (
-            0.05 * model_score  # Minimal neural model weight
-            + 0.35 * avg_phoneme_complexity  # Increased phoneme weight
+            0.4 * avg_phoneme_complexity  # Increased phoneme weight
             + 0.2 * max_phoneme_complexity  # Maintained difficult phonemes weight
             + 0.2 * syllable_complexity  # Maintained syllable importance
             + 0.1 * phonotactic_penalty  # Reduced phonotactic weight
@@ -170,7 +129,7 @@ class PronDifficulty:
         )
 
         # Different handling for simple vs complex words
-        if base_score < 0.3:
+        if base_score < 0.4:
             # For simple words, reduce the score and apply minimal length penalty
             length_factor = (
                 0.05 * min(len(phoneme_list) - 3, 2) if len(phoneme_list) > 3 else 0
@@ -191,13 +150,13 @@ class PronDifficulty:
         final_score *= 1 + length_factor
 
         # Apply sigmoid scaling with different parameters for simple vs complex words
-        if final_score < 0.3:
+        if final_score < 0.4:
             # Gentler curve for simple words
-            x = 4 * (final_score - 0.15)
-            final_score = 0.3 / (1 + np.exp(-x))
+            x = 4 * (final_score - 0.2)
+            final_score = 0.4 / (1 + np.exp(-x))
         else:
             # Steeper curve for complex words
-            x = 6 * (final_score - 0.5)
+            x = 6 * (final_score - 0.6)
             final_score = 1 / (1 + np.exp(-x))
 
             # Additional boost for very complex words
