@@ -82,7 +82,7 @@ Words get additional difficulty points based on length:
 
 - ≤3 phonemes: no extra points
 - 4-6 phonemes: +0.2 per extra phoneme
-- > 6 phonemes: +0.1 per extra phoneme (max 0.7)
+- \> 6 phonemes: +0.1 per extra phoneme (max 0.7)
 
 ### Final Score Adjustment
 
