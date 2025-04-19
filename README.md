@@ -128,6 +128,23 @@ Contributions welcome! Areas for improvement:
 - Enhanced prosodic analysis
 - Performance optimizations
 
+## Citation
+
+If you use PronDifficulty in your academic work, please cite it as follows:
+
+```bibtex
+@software{Torrielli_PronDifficulty_2025,
+author = {Torrielli, Federico},
+title = {{PronDifficulty: A Rule-Based System for Pronunciation Difficulty Evaluation}},
+url = {https://github.com/federicotorrielli/PronDifficulty},
+year = {2025}
+}
+```
+
+Alternatively, you can use this plain text citation:
+
+Federico Torrielli. (2025). PronDifficulty: A Rule-Based System for Pronunciation Difficulty Evaluation. https://github.com/federicotorrielli/PronDifficulty
+
 ## License
 
 This project is licensed under the European Union Public Licence (EUPL) v. 1.2. See the [LICENSE](LICENSE) file for details.
